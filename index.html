@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PC Builder</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121214">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PC Builder">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{color-scheme:dark;--bg:#121214;--pn:#1b1b1f;--ln:#2d2d34;--tx:#ececf1;--mu:#9393a0;--ok:#5ad19a;--wn:#f0b24a;--bd:#ff6070}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0 auto;max-width:560px;color:var(--tx);font:16px/1.4 "Avenir Next",Avenir,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(28px + env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 12px}
+h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.01em}
+h2{margin:22px 16px 8px;font-size:15px;font-weight:600;color:var(--mu)}
+button{font:inherit;color:var(--tx);cursor:pointer}
+.pill{background:none;border:1px solid var(--ln);border-radius:999px;padding:8px 14px}
+.rgb{height:3px;background:linear-gradient(90deg,#ff3d6e,#ffb02e,#3dff9a,#2ea8ff,#b04dff,#ff3d6e,#ffb02e);background-size:200% 100%;animation:fl 9s linear infinite}
+@keyframes fl{to{background-position:-200% 0}}
+.sum{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:10px;padding:16px;font-variant-numeric:tabular-nums}
+.sum small{display:block;color:var(--mu);font-size:12px}
+.sum b{font-size:18px}
+#c.ok{color:var(--ok)}#c.wn{color:var(--wn)}#c.bd{color:var(--bd)}
+#is{list-style:none;margin:0;padding:0 16px}
+#is li{background:var(--pn);border-left:3px solid var(--mu);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:14px}
+#is .bd{border-color:var(--bd)}#is .wn{border-color:var(--wn)}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 12px;width:calc(100% - 32px);margin:0 16px 8px;text-align:left;background:var(--pn);border:1px solid var(--ln);border-left:4px solid hsl(var(--c) 90% 60%);border-radius:10px;padding:10px 12px}
+.row .l{grid-column:1/-1;color:var(--mu);font-size:12px}
+.row .n{font-weight:600}
+.row .p{text-align:right;font-variant-numeric:tabular-nums;grid-row:2/4;grid-column:2}
+.row .p small{display:block;color:var(--mu);font-size:12px;font-weight:400}
+.row.em{border-left-color:var(--ln);border-left-style:solid}
+.row.em .n{color:var(--mu);font-weight:400}
+footer{text-align:center;margin-top:24px}
+.sh{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;z-index:5}
+.sh[hidden]{display:none}
+.card{background:var(--pn);width:100%;max-width:560px;margin:0 auto;border-radius:16px 16px 0 0;max-height:88vh;overflow:auto;padding:14px 16px calc(16px + env(safe-area-inset-bottom))}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:18px}
+.hd button{background:none;border:0;color:var(--mu)}
+input{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:11px 12px;font:inherit}
+.g3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;margin-bottom:10px}
+label{font-size:12px;color:var(--mu)}
+.nm{margin:0 0 8px;font-weight:600}
+.rm{background:none;border:0;color:var(--bd);padding:4px 0 14px}
+.it{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--ln);padding:13px 2px}
+.hint{color:var(--mu);font-size:14px}
+.stage{height:320px;perspective:800px;display:grid;place-items:center;touch-action:none;overflow:hidden}
+.scene{position:relative;width:220px;height:140px;margin-top:70px;transform-style:preserve-3d;transform:rotateX(60deg) rotateZ(var(--a,30deg))}
+.ly{position:absolute;inset:0;transform:translateZ(var(--z));border:1.5px dashed var(--ln);border-radius:10px;display:grid;place-items:center;color:var(--mu);font-size:13px}
+.ly.on{border:1.5px solid hsl(var(--c) 90% 60%);background:hsl(var(--c) 90% 60%/.14);box-shadow:0 0 14px hsl(var(--c) 90% 60%/.45);color:var(--tx)}
+@media (prefers-reduced-motion:reduce){.rgb{animation:none}}
+</style>
+</head>
+<body>
+<header><h1>Mon PC</h1><button class="pill" id="b3">Vue 3D</button></header>
+<div class="rgb"></div>
+<section class="sum">
+<div><small>Budget</small><b id="t"></b></div>
+<div><small>Conso estimée</small><b id="w"></b></div>
+<div><small>Compatibilité</small><b id="c"></b></div>
+</section>
+<ul id="is"></ul>
+<h2>Composants</h2><div id="g1"></div>
+<h2>Périphériques</h2><div id="g2"></div>
+<footer><button class="pill" id="rs">Revenir à la config de départ</button></footer>
+<div class="sh" id="sh" hidden><div class="card" id="bd"></div></div>
+<script>
+const S=[['cpu','Processeur'],['gpu','Carte graphique'],['mb','Carte mère'],['ram','Mémoire'],['ssd','Stockage'],['cool','Refroidissement'],['psu','Alimentation'],['case','Boîtier'],['fan','Ventilateurs']];
+const P=[['mon','Écran'],['mon2','Deuxième écran'],['kb','Clavier'],['ms','Souris'],['hs','Casque'],['ch','Chaise'],['oth','Autres accessoires']];
+const L=Object.fromEntries(S.concat(P));
+/* [catégorie, nom, conso W, attributs {s:socket, m:RAM, r:radiateur max/mm, pw:watts alim}, prix] */
+const C=[
+['cpu','AMD Ryzen 7 9800X3D',120,{s:'AM5'}],['cpu','AMD Ryzen 7 7800X3D',120,{s:'AM5'}],['cpu','AMD Ryzen 5 9600X',65,{s:'AM5'}],['cpu','Intel Core Ultra 7 265K',125,{s:'LGA1851'}],
+['gpu','ASUS Prime Radeon RX 9070 XT OC 16 Go',304],['gpu','Sapphire Pulse Radeon RX 9070 XT 16 Go',304],['gpu','NVIDIA GeForce RTX 5070 Ti 16 Go',300],['gpu','NVIDIA GeForce RTX 5080 16 Go',360],
+['mb','MSI B850 Gaming Plus WiFi 6E',50,{s:'AM5',m:'DDR5'}],['mb','ASUS TUF Gaming B850-Plus WiFi',50,{s:'AM5',m:'DDR5'}],['mb','MSI MAG Z890 Tomahawk WiFi',55,{s:'LGA1851',m:'DDR5'}],
+['ram','Crucial Pro DDR5 32 Go (2×16) 6000 CL36',10,{m:'DDR5'}],['ram','Corsair Vengeance DDR5 32 Go 6000',10,{m:'DDR5'}],['ram','G.Skill Trident Z5 DDR5 32 Go 6000',10,{m:'DDR5'}],['ram','Corsair Vengeance LPX DDR4 32 Go 3600',8,{m:'DDR4'}],
+['ssd','Samsung 990 2 To NVMe',8],['ssd','WD Black SN850X 2 To',8],['ssd','Crucial T500 2 To',8],
+['cool','Thermalright Frozen Notte 360 ARGB V2 noir',15,{r:360}],['cool','Arctic Liquid Freezer III 280',15,{r:280}],['cool','DeepCool LT720 360',15,{r:360}],
+['psu','Corsair RM850e (2025) 850 W',0,{pw:850}],['psu','Corsair RM750e 750 W',0,{pw:750}],['psu','MSI MAG A1000GL PCIE5 1000 W',0,{pw:1000}],
+['case','Lian Li LANCOOL 216 RGB noir',0,{r:360}],['case','NZXT H5 Flow',0,{r:280}],['case','Fractal Design North',0,{r:360}],
+['fan','Lian Li UNI FAN SL-INF 120 mm noir reverse',5,{},47.2],
+['mon','MSI MAG 271QP QD-OLED X28 (26,5" 280 Hz)'],['mon','ASUS ROG Swift OLED PG27AQDM 27" 240 Hz'],
+['kb','Wooting 60HE'],['kb','Logitech G Pro X TKL'],
+['ms','MCHOSE A7V2 Pro',0,{},60],['ms','Logitech G Pro X Superlight 2'],
+['hs','Razer BlackShark V2 X noir'],['hs','HyperX Cloud III'],
+['ch','SIHOO M57 ergonomique maille noire']
+];
+const $=s=>document.querySelector(s),E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const eur=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:2}).format(n);
+const mk=c=>({n:c[1],w:c[2]||0,a:c[3]||{},p:c[4]||0,q:1});
+const F=s=>mk(C.find(c=>c[1].includes(s)));
+const def=()=>({cpu:F('9800X3D'),gpu:F('Prime Radeon'),mb:F('B850 Gaming Plus'),ram:F('Crucial Pro'),ssd:F('Samsung 990'),cool:F('Frozen Notte'),psu:F('RM850e'),case:F('LANCOOL'),fan:{...F('UNI FAN'),q:2},mon:F('271QP'),mon2:{n:'AMZFAST',w:0,a:{},p:0,q:1},ms:F('MCHOSE'),hs:F('BlackShark'),ch:F('SIHOO')});
+let st,cur;
+try{st=JSON.parse(localStorage.getItem('pcb1'))}catch(e){}
+st=st||def();
+const save=()=>{try{localStorage.setItem('pcb1',JSON.stringify(st))}catch(e){}};
+
+function chk(){
+ const a=k=>st[k]?st[k].a:{},I=[],V=Object.values(st);
+ const w=V.reduce((s,x)=>s+x.w*x.q,0),pw=a('psu').pw;
+ if(a('cpu').s&&a('mb').s&&a('cpu').s!==a('mb').s)I.push(['bd',`Le processeur (${a('cpu').s}) ne se monte pas sur cette carte mère (${a('mb').s}).`]);
+ if(a('ram').m&&a('mb').m&&a('ram').m!==a('mb').m)I.push(['bd',`La mémoire ${a('ram').m} est incompatible avec une carte mère ${a('mb').m}.`]);
+ if(a('cool').r&&a('case').r&&a('cool').r>a('case').r)I.push(['bd',`Le radiateur ${a('cool').r} mm ne rentre pas dans ce boîtier (maximum ${a('case').r} mm).`]);
+ if(pw){if(pw<w)I.push(['bd',`L’alimentation (${pw} W) est sous la conso estimée (${w} W).`]);else if(pw<w*1.3)I.push(['wn',`Marge faible : ${pw} W pour ${w} W estimés. Vise 30 % de marge.`])}
+ const m=['cpu','gpu','mb','ram','ssd','psu','case'].filter(k=>!st[k]);
+ if(m.length)I.push(['',`Il manque : ${m.map(k=>L[k].toLowerCase()).join(', ')}.`]);
+ return{w,pw,I}
+}
+function render(){
+ const{w,pw,I}=chk(),t=Object.values(st).reduce((s,x)=>s+x.p*x.q,0);
+ $('#t').textContent=eur(t);
+ $('#w').textContent=w+' W'+(pw?' / '+pw:'');
+ const c=I.some(i=>i[0]=='bd')?['bd','Problème']:I.some(i=>i[0]=='wn')?['wn','À vérifier']:I.length?['','Incomplet']:['ok','Compatible'];
+ $('#c').className=c[0];$('#c').textContent=c[1];
+ $('#is').innerHTML=I.map(i=>`<li class="${i[0]}">${E(i[1])}</li>`).join('');
+ const row=(k,l,i)=>{const x=st[k];return`<button class="row${x?'':' em'}" data-k="${k}" style="--c:${(i*40)%360}"><span class="l">${l}</span><span class="n">${x?E(x.n)+(x.q>1?' ×'+x.q:''):'Choisir'}</span><span class="p">${x&&x.p?eur(x.p*x.q):''}${x&&x.w?`<small>${x.w*x.q} W</small>`:''}</span></button>`};
+ $('#g1').innerHTML=S.map((s,i)=>row(s[0],s[1],i)).join('');
+ $('#g2').innerHTML=P.map((s,i)=>row(s[0],s[1],i+S.length)).join('');
+}
+const closeSh=()=>{$('#sh').hidden=true};
+function sheet(h){$('#bd').innerHTML=h;$('#sh').hidden=false;$('#bd').scrollTop=0;$('#cl').onclick=closeSh}
+$('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};
+function pick(k){
+ cur=k;
+ sheet(`<div class="hd"><b>${L[k]}</b><button id="cl">Fermer</button></div><div id="ed"></div><input id="q" type="search" placeholder="Marque ou modèle" autocomplete="off"><div id="ls"></div>`);
+ edit();list();$('#q').oninput=list;
+}
+function edit(){
+ const x=st[cur];
+ $('#ed').innerHTML=x?`<p class="nm">${E(x.n)}</p><div class="g3"><label>Prix (€)<input id="ip" inputmode="decimal" value="${x.p||''}"></label><label>Quantité<input id="iq" inputmode="numeric" value="${x.q}"></label><label>Conso (W)<input id="iw" inputmode="numeric" value="${x.w||''}"></label></div><button class="rm" id="rm">Retirer cette pièce</button>`:'';
+ if(!x)return;
+ const u=()=>{x.p=parseFloat($('#ip').value.replace(',','.'))||0;x.q=Math.max(1,parseInt($('#iq').value)||1);x.w=parseInt($('#iw').value)||0;save();render()};
+ ['#ip','#iq','#iw'].forEach(s=>$(s).oninput=u);
+ $('#rm').onclick=()=>{delete st[cur];save();render();closeSh()};
+}
+function list(){
+ const q=$('#q').value.trim(),c=cur=='mon2'?'mon':cur;
+ const r=C.filter(i=>i[0]==c&&i[1].toLowerCase().includes(q.toLowerCase()));
+ $('#ls').innerHTML=r.map(i=>`<button class="it" data-i="${C.indexOf(i)}">${E(i[1])}</button>`).join('')+(q?`<button class="it" data-c="1">Ajouter « ${E(q)} » comme pièce perso</button>`:`<p class="hint">Pas dans la liste ? Tape son nom pour l’ajouter.</p>`);
+}
+$('#bd').onclick=e=>{
+ const b=e.target.closest('.it');if(!b)return;
+ st[cur]=b.dataset.c?{n:$('#q').value.trim(),w:0,a:{},p:0,q:1}:mk(C[b.dataset.i]);
+ save();render();edit();$('#q').value='';list();$('#bd').scrollTop=0;
+};
+document.addEventListener('click',e=>{const b=e.target.closest('.row');if(b)pick(b.dataset.k)});
+function v3(){
+ const O=['case','psu','gpu','mb','cool','cpu','ram','ssd','fan'];
+ sheet(`<div class="hd"><b>Vue 3D</b><button id="cl">Fermer</button></div><div class="stage" id="sg"><div class="scene" id="sc">${O.map((k,i)=>`<div class="ly${st[k]?' on':''}" style="--z:${i*30}px;--c:${i*40}">${L[k]}</div>`).join('')}</div></div><p class="hint">Glisse pour tourner. Une couche allumée est une pièce choisie.</p>`);
+ let a=30,x0=null;const sg=$('#sg');
+ sg.onpointerdown=e=>{x0=e.clientX;sg.setPointerCapture(e.pointerId)};
+ sg.onpointermove=e=>{if(x0==null)return;a+=(e.clientX-x0)*.6;x0=e.clientX;$('#sc').style.setProperty('--a',a+'deg')};
+ sg.onpointerup=()=>{x0=null};
+}
+$('#b3').onclick=v3;
+$('#rs').onclick=()=>{if(confirm('Revenir à la configuration de départ ? Tes changements seront perdus.')){st=def();save();render()}};
+render();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
