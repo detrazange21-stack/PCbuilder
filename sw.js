@@ -1,4 +1,4 @@
-const CACHE = 'pcbuilder-v1';
+const CACHE = 'pcbuilder-v5';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -16,7 +16,7 @@ self.addEventListener('activate', e => {
 // Réseau d'abord (toujours la dernière version), cache en secours hors ligne.
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  if (e.request.method !== 'GET' || (url.origin !== location.origin && url.hostname !== 'cdnjs.cloudflare.com')) return;
   e.respondWith(
     fetch(e.request)
       .then(res => {

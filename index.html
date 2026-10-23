@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>PC Builder</title>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#121214">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,7 +19,7 @@
 html{background:var(--bg)}
 body{margin:0 auto;max-width:560px;color:var(--tx);font:16px/1.4 "Avenir Next",Avenir,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(28px + env(safe-area-inset-bottom))}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 12px}
-h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.01em}
+h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em}
 h2{margin:22px 16px 8px;font-size:15px;font-weight:600;color:var(--mu)}
 button{font:inherit;color:var(--tx);cursor:pointer}
 .pill{background:none;border:1px solid var(--ln);border-radius:999px;padding:8px 14px}
@@ -31,13 +32,34 @@ button{font:inherit;color:var(--tx);cursor:pointer}
 #is{list-style:none;margin:0;padding:0 16px}
 #is li{background:var(--pn);border-left:3px solid var(--mu);border-radius:8px;padding:10px 12px;margin-bottom:6px;font-size:14px}
 #is .bd{border-color:var(--bd)}#is .wn{border-color:var(--wn)}
-.row{display:grid;grid-template-columns:1fr auto;gap:2px 12px;width:calc(100% - 32px);margin:0 16px 8px;text-align:left;background:var(--pn);border:1px solid var(--ln);border-left:4px solid hsl(var(--c) 90% 60%);border-radius:10px;padding:10px 12px}
-.row .l{grid-column:1/-1;color:var(--mu);font-size:12px}
+.row{display:flex;align-items:center;margin:0 16px 8px;background:var(--pn);border:1px solid var(--ln);border-left:4px solid hsl(var(--c) 90% 60%);border-radius:10px}
+.row.em{border-left-color:var(--ln)}
+.row .main{flex:1;min-width:0;display:grid;gap:2px;text-align:left;background:none;border:0;padding:10px 4px 10px 12px}
+.row .l{color:var(--mu);font-size:12px}
 .row .n{font-weight:600}
-.row .p{text-align:right;font-variant-numeric:tabular-nums;grid-row:2/4;grid-column:2}
-.row .p small{display:block;color:var(--mu);font-size:12px;font-weight:400}
-.row.em{border-left-color:var(--ln);border-left-style:solid}
-.row.em .n{color:var(--mu);font-weight:400}
+.row.em .n{color:var(--mu);font-weight:500}
+.row .m{color:var(--mu);font-size:13px;font-variant-numeric:tabular-nums}
+.act{display:flex;padding-right:4px}
+.ic{width:42px;height:42px;display:grid;place-items:center;background:none;border:0;color:var(--mu);border-radius:10px}
+.ic:active{background:var(--ln)}
+.ic.del{color:var(--bd)}
+.ic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sub{margin:0 0 6px;color:var(--mu);font-size:12px}
+.shops{margin:0 0 14px;border:1px solid var(--ln);border-radius:10px}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:6px 6px 6px 12px;border-bottom:1px solid var(--ln)}
+.sr:last-child{border-bottom:0}
+.sr a{color:var(--tx);text-decoration:none;background:#26262c;border:1px solid var(--ln);border-radius:999px;padding:8px 20px;font-weight:600}
+main[hidden]{display:none}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:34px 24px 22px}
+.hero img{width:96px;height:96px;border-radius:22px;margin-bottom:16px}
+.hero h1{font-size:32px}
+.hero p{margin:8px 0 0;color:var(--mu);max-width:30ch}
+.mn{display:block;width:calc(100% - 32px);margin:0 16px 10px;text-align:left;background:var(--pn);border:1px solid var(--ln);border-left:4px solid hsl(var(--c) 90% 60%);border-radius:12px;padding:15px 16px}
+.mn b{display:block;font-size:17px}
+.mn span{color:var(--mu);font-size:14px}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:528px;margin:0 auto;z-index:9;display:flex;justify-content:space-between;align-items:center;background:#26262c;border:1px solid var(--ln);border-radius:12px;padding:12px 14px}
+.toast[hidden]{display:none}
+.toast button{background:none;border:0;color:#6fb3ff;padding:0 0 0 16px}
 footer{text-align:center;margin-top:24px}
 .sh{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;z-index:5}
 .sh[hidden]{display:none}
@@ -45,21 +67,27 @@ footer{text-align:center;margin-top:24px}
 .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:18px}
 .hd button{background:none;border:0;color:var(--mu)}
 input{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--ln);border-radius:10px;padding:11px 12px;font:inherit}
-.g3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 label{font-size:12px;color:var(--mu)}
 .nm{margin:0 0 8px;font-weight:600}
 .rm{background:none;border:0;color:var(--bd);padding:4px 0 14px}
 .it{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--ln);padding:13px 2px}
 .hint{color:var(--mu);font-size:14px}
-.stage{height:320px;perspective:800px;display:grid;place-items:center;touch-action:none;overflow:hidden}
-.scene{position:relative;width:220px;height:140px;margin-top:70px;transform-style:preserve-3d;transform:rotateX(60deg) rotateZ(var(--a,30deg))}
-.ly{position:absolute;inset:0;transform:translateZ(var(--z));border:1.5px dashed var(--ln);border-radius:10px;display:grid;place-items:center;color:var(--mu);font-size:13px}
-.ly.on{border:1.5px solid hsl(var(--c) 90% 60%);background:hsl(var(--c) 90% 60%/.14);box-shadow:0 0 14px hsl(var(--c) 90% 60%/.45);color:var(--tx)}
+.cv{display:block;width:100%;height:340px;touch-action:none;border-radius:12px;background:#0d0d10}
 @media (prefers-reduced-motion:reduce){.rgb{animation:none}}
 </style>
 </head>
 <body>
-<header><h1>Mon PC</h1><button class="pill" id="b3">Vue 3D</button></header>
+<main id="home">
+<div class="rgb"></div>
+<div class="hero"><img src="icon-192.png" alt=""><h1>PC Builder</h1><p>Compose ton PC, vérifie la compatibilité et compare les prix.</p></div>
+<button class="mn" data-m="cfg" style="--c:190"><b>Ma configuration</b><span id="hs"></span></button>
+<button class="mn" data-m="3d" style="--c:270"><b>Vue 3D</b><span>Fais tourner ton PC, couche par couche</span></button>
+<button class="mn" data-m="new" style="--c:130"><b>Nouvelle configuration</b><span>Partir de zéro, toutes les cases vides</span></button>
+<button class="mn" data-m="def" style="--c:30"><b>Config de départ</b><span>Revenir à la configuration d’origine</span></button>
+</main>
+<main id="cfg" hidden>
+<header><button class="pill" id="bk">Menu</button><h1>Mon PC</h1><button class="pill" id="b3">Vue 3D</button></header>
 <div class="rgb"></div>
 <section class="sum">
 <div><small>Budget</small><b id="t"></b></div>
@@ -70,6 +98,8 @@ label{font-size:12px;color:var(--mu)}
 <h2>Composants</h2><div id="g1"></div>
 <h2>Périphériques</h2><div id="g2"></div>
 <footer><button class="pill" id="rs">Revenir à la config de départ</button></footer>
+</main>
+<div class="toast" id="ts" hidden></div>
 <div class="sh" id="sh" hidden><div class="card" id="bd"></div></div>
 <script>
 const S=[['cpu','Processeur'],['gpu','Carte graphique'],['mb','Carte mère'],['ram','Mémoire'],['ssd','Stockage'],['cool','Refroidissement'],['psu','Alimentation'],['case','Boîtier'],['fan','Ventilateurs']];
@@ -77,15 +107,15 @@ const P=[['mon','Écran'],['mon2','Deuxième écran'],['kb','Clavier'],['ms','So
 const L=Object.fromEntries(S.concat(P));
 /* [catégorie, nom, conso W, attributs {s:socket, m:RAM, r:radiateur max/mm, pw:watts alim}, prix] */
 const C=[
-['cpu','AMD Ryzen 7 9800X3D',120,{s:'AM5'}],['cpu','AMD Ryzen 7 7800X3D',120,{s:'AM5'}],['cpu','AMD Ryzen 5 9600X',65,{s:'AM5'}],['cpu','Intel Core Ultra 7 265K',125,{s:'LGA1851'}],
-['gpu','ASUS Prime Radeon RX 9070 XT OC 16 Go',304],['gpu','Sapphire Pulse Radeon RX 9070 XT 16 Go',304],['gpu','NVIDIA GeForce RTX 5070 Ti 16 Go',300],['gpu','NVIDIA GeForce RTX 5080 16 Go',360],
-['mb','MSI B850 Gaming Plus WiFi 6E',50,{s:'AM5',m:'DDR5'}],['mb','ASUS TUF Gaming B850-Plus WiFi',50,{s:'AM5',m:'DDR5'}],['mb','MSI MAG Z890 Tomahawk WiFi',55,{s:'LGA1851',m:'DDR5'}],
-['ram','Crucial Pro DDR5 32 Go (2×16) 6000 CL36',10,{m:'DDR5'}],['ram','Corsair Vengeance DDR5 32 Go 6000',10,{m:'DDR5'}],['ram','G.Skill Trident Z5 DDR5 32 Go 6000',10,{m:'DDR5'}],['ram','Corsair Vengeance LPX DDR4 32 Go 3600',8,{m:'DDR4'}],
-['ssd','Samsung 990 2 To NVMe',8],['ssd','WD Black SN850X 2 To',8],['ssd','Crucial T500 2 To',8],
-['cool','Thermalright Frozen Notte 360 ARGB V2 noir',15,{r:360}],['cool','Arctic Liquid Freezer III 280',15,{r:280}],['cool','DeepCool LT720 360',15,{r:360}],
+['cpu','AMD Ryzen 7 9800X3D',120,{s:'AM5',o:'TDP officiel AMD'}],['cpu','AMD Ryzen 7 7800X3D',120,{s:'AM5',o:'TDP officiel AMD'}],['cpu','AMD Ryzen 5 9600X',65,{s:'AM5',o:'TDP officiel AMD'}],['cpu','Intel Core Ultra 7 265K',125,{s:'LGA1851',o:'puissance de base Intel, pic à 250 W'}],
+['gpu','ASUS Prime Radeon RX 9070 XT OC 16 Go',317,{o:'TBP de la carte'}],['gpu','Sapphire Pulse Radeon RX 9070 XT 16 Go',304,{o:'TBP fiche Sapphire'}],['gpu','NVIDIA GeForce RTX 5070 Ti 16 Go',300,{o:'TGP NVIDIA'}],['gpu','NVIDIA GeForce RTX 5080 16 Go',360,{o:'TGP NVIDIA'}],
+['mb','MSI B850 Gaming Plus WiFi 6E',50,{s:'AM5',m:'DDR5',e:1}],['mb','ASUS TUF Gaming B850-Plus WiFi',50,{s:'AM5',m:'DDR5',e:1}],['mb','MSI MAG Z890 Tomahawk WiFi',55,{s:'LGA1851',m:'DDR5',e:1}],
+['ram','Crucial Pro DDR5 32 Go (2×16) 6000 CL36',10,{m:'DDR5',e:1}],['ram','Corsair Vengeance DDR5 32 Go 6000',10,{m:'DDR5',e:1}],['ram','G.Skill Trident Z5 DDR5 32 Go 6000',10,{m:'DDR5',e:1}],['ram','Corsair Vengeance LPX DDR4 32 Go 3600',8,{m:'DDR4',e:1}],
+['ssd','Samsung 990 2 To NVMe',4.3,{o:'fiche Samsung, lecture moyenne'}],['ssd','WD Black SN850X 2 To',8,{e:1}],['ssd','Crucial T500 2 To',8,{e:1}],
+['cool','Thermalright Frozen Notte 360 ARGB V2 noir',7.26,{r:360,o:'pompe 1,5 W + 3 ventilateurs de 0,16 A à 12 V'}],['cool','Arctic Liquid Freezer III 280',15,{r:280,e:1}],['cool','DeepCool LT720 360',15,{r:360,e:1}],
 ['psu','Corsair RM850e (2025) 850 W',0,{pw:850}],['psu','Corsair RM750e 750 W',0,{pw:750}],['psu','MSI MAG A1000GL PCIE5 1000 W',0,{pw:1000}],
 ['case','Lian Li LANCOOL 216 RGB noir',0,{r:360}],['case','NZXT H5 Flow',0,{r:280}],['case','Fractal Design North',0,{r:360}],
-['fan','Lian Li UNI FAN SL-INF 120 mm noir reverse',5,{},47.2],
+['fan','Lian Li UNI FAN SL-INF 120 mm noir reverse',5.16,{o:'fiche Lian Li, par ventilateur'},47.2],
 ['mon','MSI MAG 271QP QD-OLED X28 (26,5" 280 Hz)'],['mon','ASUS ROG Swift OLED PG27AQDM 27" 240 Hz'],
 ['kb','Wooting 60HE'],['kb','Logitech G Pro X TKL'],
 ['ms','MCHOSE A7V2 Pro',0,{},60],['ms','Logitech G Pro X Superlight 2'],
@@ -100,11 +130,14 @@ const def=()=>({cpu:F('9800X3D'),gpu:F('Prime Radeon'),mb:F('B850 Gaming Plus'),
 let st,cur;
 try{st=JSON.parse(localStorage.getItem('pcb1'))}catch(e){}
 st=st||def();
+Object.values(st).forEach(x=>{const c=C.find(i=>i[1]==x.n);if(c){x.w=c[2]||0;x.a=c[3]||{}}});
+const fw=n=>String(Math.round(n*10)/10).replace('.',',');
+const cl=x=>(x.w?(x.a.e?'≈ ':'')+fw(x.w*x.q)+' W':x.a.pw?'Alimentation '+x.a.pw+' W':'Non renseignée')+(x.a.e?' · valeur typique, pas de chiffre officiel':x.a.o?' · '+x.a.o:'');
 const save=()=>{try{localStorage.setItem('pcb1',JSON.stringify(st))}catch(e){}};
 
 function chk(){
  const a=k=>st[k]?st[k].a:{},I=[],V=Object.values(st);
- const w=V.reduce((s,x)=>s+x.w*x.q,0),pw=a('psu').pw;
+ const w=Math.round(V.reduce((s,x)=>s+x.w*x.q,0)),pw=a('psu').pw;
  if(a('cpu').s&&a('mb').s&&a('cpu').s!==a('mb').s)I.push(['bd',`Le processeur (${a('cpu').s}) ne se monte pas sur cette carte mère (${a('mb').s}).`]);
  if(a('ram').m&&a('mb').m&&a('ram').m!==a('mb').m)I.push(['bd',`La mémoire ${a('ram').m} est incompatible avec une carte mère ${a('mb').m}.`]);
  if(a('cool').r&&a('case').r&&a('cool').r>a('case').r)I.push(['bd',`Le radiateur ${a('cool').r} mm ne rentre pas dans ce boîtier (maximum ${a('case').r} mm).`]);
@@ -115,29 +148,36 @@ function chk(){
 }
 function render(){
  const{w,pw,I}=chk(),t=Object.values(st).reduce((s,x)=>s+x.p*x.q,0);
- $('#t').textContent=eur(t);
+ $('#t').textContent=Object.values(st).length&&Object.values(st).every(x=>x.p>0)?eur(t):'—';
  $('#w').textContent=w+' W'+(pw?' / '+pw:'');
  const c=I.some(i=>i[0]=='bd')?['bd','Problème']:I.some(i=>i[0]=='wn')?['wn','À vérifier']:I.length?['','Incomplet']:['ok','Compatible'];
  $('#c').className=c[0];$('#c').textContent=c[1];
  $('#is').innerHTML=I.map(i=>`<li class="${i[0]}">${E(i[1])}</li>`).join('');
- const row=(k,l,i)=>{const x=st[k];return`<button class="row${x?'':' em'}" data-k="${k}" style="--c:${(i*40)%360}"><span class="l">${l}</span><span class="n">${x?E(x.n)+(x.q>1?' ×'+x.q:''):'Choisir'}</span><span class="p">${x&&x.p?eur(x.p*x.q):''}${x&&x.w?`<small>${x.w*x.q} W</small>`:''}</span></button>`};
+ const ic={sw:'<svg viewBox="0 0 24 24"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg>',tr:'<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M10 11v6M14 11v6"/></svg>'};
+ const row=(k,l,i)=>{
+  const x=st[k],c=(i*40)%360;
+  if(!x)return`<div class="row em" style="--c:${c}"><button class="main" data-a="open" data-k="${k}"><span class="n">${l}</span></button></div>`;
+  const m=[x.w?(x.a.e?'≈ ':'')+fw(x.w*x.q)+' W':x.a.pw?'capacité '+x.a.pw+' W':'',x.p?eur(x.p*x.q):''].filter(Boolean).join(' · ');
+  return`<div class="row" style="--c:${c}"><button class="main" data-a="open" data-k="${k}"><span class="l">${l}</span><span class="n">${E(x.n)}${x.q>1?' ×'+x.q:''}</span>${m?`<span class="m">${m}</span>`:''}</button><div class="act"><button class="ic" data-a="swap" data-k="${k}" aria-label="Remplacer ${l}">${ic.sw}</button><button class="ic del" data-a="del" data-k="${k}" aria-label="Retirer ${l}">${ic.tr}</button></div></div>`};
  $('#g1').innerHTML=S.map((s,i)=>row(s[0],s[1],i)).join('');
  $('#g2').innerHTML=P.map((s,i)=>row(s[0],s[1],i+S.length)).join('');
 }
-const closeSh=()=>{$('#sh').hidden=true};
-function sheet(h){$('#bd').innerHTML=h;$('#sh').hidden=false;$('#bd').scrollTop=0;$('#cl').onclick=closeSh}
+function toast(t,fn){const el=$('#ts');el.innerHTML='<span>'+E(t)+'</span><button id="ud">Annuler</button>';el.hidden=false;clearTimeout(toast.t);$('#ud').onclick=()=>{fn();el.hidden=true};toast.t=setTimeout(()=>{el.hidden=true},6000)}
+const closeSh=()=>{off3d();$('#sh').hidden=true};
+function sheet(h){off3d();$('#bd').innerHTML=h;$('#sh').hidden=false;$('#bd').scrollTop=0;$('#cl').onclick=closeSh}
 $('#sh').onclick=e=>{if(e.target.id=='sh')closeSh()};
-function pick(k){
+function pick(k,rp){
  cur=k;
- sheet(`<div class="hd"><b>${L[k]}</b><button id="cl">Fermer</button></div><div id="ed"></div><input id="q" type="search" placeholder="Marque ou modèle" autocomplete="off"><div id="ls"></div>`);
- edit();list();$('#q').oninput=list;
+ sheet(`<div class="hd"><b>${rp&&st[k]?'Remplacer · ':''}${L[k]}</b><button id="cl">Fermer</button></div><div id="ed"></div><input id="q" type="search" placeholder="Marque ou modèle" autocomplete="off"><div id="ls"></div>`);
+ if(!rp)edit();list();$('#q').oninput=list;
 }
+const shops=n=>{const q=encodeURIComponent(n);return[['Amazon','https://www.amazon.fr/s?k='+q],['LDLC','https://www.ldlc.com/recherche/'+q+'/'],['Materiel.net','https://www.materiel.net/recherche/'+q+'/'],['Cdiscount','https://www.cdiscount.com/search/10/'+q+'.html'],['Idealo','https://www.idealo.fr/resultats.html?q='+q],['Google Shopping','https://www.google.com/search?tbm=shop&q='+q]].map(h=>`<div class="sr"><span>${h[0]}</span><a href="${h[1]}" target="_blank" rel="noopener">Aller</a></div>`).join('')};
 function edit(){
  const x=st[cur];
- $('#ed').innerHTML=x?`<p class="nm">${E(x.n)}</p><div class="g3"><label>Prix (€)<input id="ip" inputmode="decimal" value="${x.p||''}"></label><label>Quantité<input id="iq" inputmode="numeric" value="${x.q}"></label><label>Conso (W)<input id="iw" inputmode="numeric" value="${x.w||''}"></label></div><button class="rm" id="rm">Retirer cette pièce</button>`:'';
+ $('#ed').innerHTML=x?`<p class="nm">${E(x.n)}</p><div class="g3"><label>Quantité<input id="iq" inputmode="numeric" value="${x.q}"></label></div><p class="sub">Consommation</p><p class="nm" id="cw">${E(cl(x))}</p><p class="sub">Voir le prix chez</p><div class="shops">${shops(x.n)}</div><button class="rm" id="rm">Retirer cette pièce</button>`:'';
  if(!x)return;
- const u=()=>{x.p=parseFloat($('#ip').value.replace(',','.'))||0;x.q=Math.max(1,parseInt($('#iq').value)||1);x.w=parseInt($('#iw').value)||0;save();render()};
- ['#ip','#iq','#iw'].forEach(s=>$(s).oninput=u);
+ const u=()=>{x.q=Math.max(1,parseInt($('#iq').value)||1);$('#cw').textContent=cl(x);save();render()};
+ $('#iq').oninput=u;
  $('#rm').onclick=()=>{delete st[cur];save();render();closeSh()};
 }
 function list(){
@@ -150,18 +190,95 @@ $('#bd').onclick=e=>{
  st[cur]=b.dataset.c?{n:$('#q').value.trim(),w:0,a:{},p:0,q:1}:mk(C[b.dataset.i]);
  save();render();edit();$('#q').value='';list();$('#bd').scrollTop=0;
 };
-document.addEventListener('click',e=>{const b=e.target.closest('.row');if(b)pick(b.dataset.k)});
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-a]');if(!b)return;
+ const k=b.dataset.k,a=b.dataset.a;
+ if(a=='del'){const x=st[k];delete st[k];save();render();toast(L[k]+' retiré',()=>{st[k]=x;save();render()})}
+ else pick(k,a=='swap');
+});
+let T3=null;
+function off3d(){if(T3){cancelAnimationFrame(T3.f);T3.r.dispose();T3=null}}
 function v3(){
- const O=['case','psu','gpu','mb','cool','cpu','ram','ssd','fan'];
- sheet(`<div class="hd"><b>Vue 3D</b><button id="cl">Fermer</button></div><div class="stage" id="sg"><div class="scene" id="sc">${O.map((k,i)=>`<div class="ly${st[k]?' on':''}" style="--z:${i*30}px;--c:${i*40}">${L[k]}</div>`).join('')}</div></div><p class="hint">Glisse pour tourner. Une couche allumée est une pièce choisie.</p>`);
- let a=30,x0=null;const sg=$('#sg');
- sg.onpointerdown=e=>{x0=e.clientX;sg.setPointerCapture(e.pointerId)};
- sg.onpointermove=e=>{if(x0==null)return;a+=(e.clientX-x0)*.6;x0=e.clientX;$('#sc').style.setProperty('--a',a+'deg')};
- sg.onpointerup=()=>{x0=null};
+ sheet(`<div class="hd"><b>Vue 3D</b><button id="cl">Fermer</button></div><canvas class="cv" id="cv"></canvas><p class="hint" id="lb">Glisse pour tourner, pince pour zoomer, touche une pièce pour voir son nom. Les pièces vides sont en fil de fer.</p>`);
+ if(!window.THREE){$('#lb').textContent='La 3D a besoin d’internet la première fois. Connecte-toi, puis rouvre la vue 3D.';return}
+ try{build3d()}catch(e){$('#lb').textContent='La 3D n’est pas disponible sur cet appareil.'}
+}
+function build3d(){
+ const TH=THREE,cv=$('#cv'),W=cv.clientWidth||340,H=340;
+ const r=new TH.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+ r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(W,H,false);
+ const sc=new TH.Scene(),cam=new TH.PerspectiveCamera(40,W/H,.1,100);
+ sc.add(new TH.AmbientLight(0xffffff,.65));
+ const dl=new TH.DirectionalLight(0xffffff,.8);dl.position.set(-4,8,5);sc.add(dl);
+ const pl=new TH.PointLight(0x6aa0ff,.9,9);pl.position.set(-.2,3,0);sc.add(pl);
+ const ghost=new TH.MeshBasicMaterial({color:0x666677,wireframe:true,transparent:true,opacity:.4}),rings=[],spin=[];
+ const mat=(c,o)=>new TH.MeshStandardMaterial(Object.assign({color:c,roughness:.55,metalness:.3},o||{}));
+ const rgb=()=>{const m=new TH.MeshBasicMaterial({color:0xff3366});rings.push(m);return m};
+ const bx=(w,h,d,m,x,y,z,g)=>{const o=new TH.Mesh(new TH.BoxGeometry(w,h,d),m);o.position.set(x,y,z);g.add(o);return o};
+ const fan=(g,rad,x,y,z,ax)=>{
+  const f=new TH.Group(),bl=new TH.Group();
+  f.add(new TH.Mesh(new TH.CylinderGeometry(rad,rad,.04,24),mat(0x111114)));
+  const t=new TH.Mesh(new TH.TorusGeometry(rad,.025,8,36),rgb());t.rotation.x=Math.PI/2;f.add(t);
+  for(let i=0;i<7;i++){const a=i*Math.PI*2/7,b=new TH.Mesh(new TH.BoxGeometry(rad*.62,.02,rad*.26),mat(0x1c1c22));b.position.set(Math.cos(a)*rad*.58,0,Math.sin(a)*rad*.58);b.rotation.y=-a;b.rotation.z=.35;bl.add(b)}
+  f.add(bl);spin.push(bl);
+  f.add(new TH.Mesh(new TH.CylinderGeometry(rad*.28,rad*.28,.06,16),mat(0x222228)));
+  f.position.set(x,y,z);if(ax=='x')f.rotation.z=Math.PI/2;g.add(f)};
+ const tube=(a,b,g)=>{const v=new TH.Vector3(b[0]-a[0],b[1]-a[1],b[2]-a[2]);const m=new TH.Mesh(new TH.CylinderGeometry(.045,.045,v.length(),8),mat(0x0c0c0f));m.position.set((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);m.quaternion.setFromUnitVectors(new TH.Vector3(0,1,0),v.normalize());g.add(m)};
+ const dark=mat(0x1b1b21),pcb=mat(0x15151a,{metalness:.1}),alu=mat(0x8e8e99,{metalness:.8,roughness:.35});
+ /* unité = 10 cm ; avant du boîtier = +z, vitre = côté -x */
+ const B={
+  case:g=>{const w=2.35,h=4.95,d=4.78,m=mat(0x17171c);
+   bx(.05,h,d,m,w/2,h/2,0,g);bx(w,.05,d,m,0,0,0,g);bx(w,.05,d,m,0,h,0,g);bx(w,h,.05,m,0,h/2,-d/2,g);bx(w,h,.05,m,0,h/2,d/2,g);
+   const gl=new TH.Mesh(new TH.PlaneGeometry(d,h),new TH.MeshStandardMaterial({color:0x4d7dff,transparent:true,opacity:.1,side:TH.DoubleSide}));
+   gl.rotation.y=Math.PI/2;gl.position.set(-w/2,h/2,0);gl.userData.noPick=1;g.add(gl);
+   const e=new TH.LineSegments(new TH.EdgesGeometry(new TH.BoxGeometry(w,h,d)),new TH.LineBasicMaterial({color:0xe9e9f2}));e.position.y=h/2;g.add(e)},
+  mb:g=>{bx(.06,2.44,3.05,pcb,.98,2.9,-.57,g);bx(.05,.5,.9,alu,.925,3.85,-1.45,g);bx(.04,.35,.35,mat(0x333340),.93,1.95,.45,g)},
+  cpu:g=>{bx(.02,.55,.55,mat(0x24242b),.94,3.27,-.64,g);bx(.03,.4,.4,alu,.925,3.27,-.64,g)},
+  ram:g=>{const m=rgb();[.28,.4].forEach(z=>{bx(.31,1.3,.07,mat(0x222228),.795,3.48,z,g);bx(.03,1.3,.07,m,.65,3.48,z,g)})},
+  gpu:g=>{bx(.5,1.3,3.12,mat(0x23232a),.7,2.15,-.64,g);bx(.52,.03,3.0,mat(0x777788),.7,2.8,-.64,g);[-1.64,-.64,.36].forEach(z=>fan(g,.42,.43,2.15,z,'x'))},
+  cool:g=>{
+   const c=new TH.Mesh(new TH.CylinderGeometry(.36,.36,.54,32),mat(0x1a1a20));c.rotation.z=Math.PI/2;c.position.set(.68,3.27,-.64);g.add(c);
+   const cap=new TH.Mesh(new TH.CylinderGeometry(.3,.3,.02,32),rgb());cap.rotation.z=Math.PI/2;cap.position.set(.4,3.27,-.64);g.add(cap);
+   bx(1.2,.27,3.6,alu,0,4.77,-.2,g);[-1.4,-.2,1.0].forEach(z=>fan(g,.55,0,4.5,z,'y'));
+   tube([.6,3.6,-.9],[.4,4.7,-1.98],g);tube([.6,3.6,-.4],[.2,4.7,-1.98],g)},
+  ssd:g=>{bx(.03,.22,.8,mat(0x2b2b33),.935,3.27,-1.55,g);bx(.005,.22,.8,alu,.92,3.27,-1.55,g)},
+  psu:g=>{bx(1.5,.86,1.6,mat(0x101014),0,.46,-1.5,g);bx(.02,.2,1.2,mat(0x2a2a33),-.75,.46,-1.5,g)},
+  fan:g=>{[1.0,-.2,-1.4].slice(0,Math.min(st.fan?st.fan.q:2,3)).forEach(z=>fan(g,.55,.2,.28,z,'y'))}
+ };
+ const root=new TH.Group();sc.add(root);
+ Object.keys(B).forEach(k=>{const g=new TH.Group();g.userData.k=k;B[k](g);
+  if(!st[k])g.traverse(o=>{if(o.isMesh){if(k=='case')o.visible=false;else o.material=ghost}});
+  root.add(g)});
+ let th=-1.2,ph=.25,d=9.5;const tg=new TH.Vector3(0,2.5,0);
+ const place=()=>{cam.position.set(tg.x+d*Math.sin(th)*Math.cos(ph),tg.y+d*Math.sin(ph),tg.z+d*Math.cos(th)*Math.cos(ph));cam.lookAt(tg)};
+ const ps=new Map(),rc=new TH.Raycaster();let mv=0,pd=0;
+ const dist=()=>{const a=[...ps.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])};
+ const tap=e=>{const b=cv.getBoundingClientRect();rc.setFromCamera(new TH.Vector2((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1),cam);
+  for(const i of rc.intersectObjects(root.children,true)){let o=i.object;if(o.userData.noPick)continue;while(o&&!o.userData.k)o=o.parent;if(o&&st[o.userData.k]){$('#lb').textContent=L[o.userData.k]+' : '+st[o.userData.k].n;return}}
+  $('#lb').textContent=''};
+ cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);ps.set(e.pointerId,[e.clientX,e.clientY]);mv=0;if(ps.size==2)pd=dist()};
+ cv.onpointermove=e=>{if(!ps.has(e.pointerId))return;const p=ps.get(e.pointerId),dx=e.clientX-p[0],dy=e.clientY-p[1];ps.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ps.size==2){const n=dist();d=Math.min(16,Math.max(5,d*pd/n));pd=n;mv=99}
+  else{th-=dx*.01;ph=Math.min(1.3,Math.max(-.15,ph+dy*.01));mv+=Math.abs(dx)+Math.abs(dy)}
+  place()};
+ cv.onpointerup=cv.onpointercancel=e=>{const t=ps.size==1&&mv<8;ps.delete(e.pointerId);if(t)tap(e)};
+ const t0=performance.now();
+ const loop=()=>{const t=(performance.now()-t0)/1000;rings.forEach((m,i)=>m.color.setHSL((t*.12+i*.07)%1,1,.55));spin.forEach(b=>{b.rotation.y+=.05});r.render(sc,cam);T3.f=requestAnimationFrame(loop)};
+ place();T3={f:0,r};loop();
 }
 $('#b3').onclick=v3;
+const show=v=>{$('#home').hidden=v!='home';$('#cfg').hidden=v=='home';scrollTo(0,0);if(v=='home')hrender()};
+function hrender(){const n=Object.keys(st).length;$('#hs').textContent=n?n+' pièce'+(n>1?'s':''):'Aucune pièce pour l’instant'}
+$('#bk').onclick=()=>show('home');
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-m]');if(!b)return;const m=b.dataset.m;
+ if(m=='cfg')show('cfg');
+ else if(m=='3d')v3();
+ else if(m=='new'){if(!Object.keys(st).length||confirm('Vider la configuration actuelle ?')){st={};save();render();show('cfg')}}
+ else if(m=='def'){if(confirm('Remplacer la configuration actuelle par celle de départ ?')){st=def();save();render();show('cfg')}}
+});
 $('#rs').onclick=()=>{if(confirm('Revenir à la configuration de départ ? Tes changements seront perdus.')){st=def();save();render()}};
-render();
+render();hrender();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
 </body>
